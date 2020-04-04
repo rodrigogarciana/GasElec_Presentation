@@ -1,0 +1,23 @@
+\frametitle{Programming languages and software}\framesubtitle {Example syntax in JuMP (Algebraic modelling)}
+\begin{itemize}
+\item Constraint for Power Generation Limits:
+\begin{itemize}
+  \item Expression:
+  $$P^{LB}_g \leq p_{g,t} \leq  P^{UB}_g \quad \forall g \in \mathcal{G},\; \forall t \in \mathcal{T}$$\\
+  \item Code:
+  \hspace{-1.5cm}\begin{Verbatim}[fontsize=\scriptsize]
+    @constraint(m, PLim[g ∈ G, t ∈ T], P_LB[g] ≤ p[g,t] ≤ P_UB[g])
+  \end{Verbatim}
+\end{itemize}\vspace{12pt}
+\item Objective function:
+\begin{itemize}
+  \item Expression:
+  $$\min \quad \sum_{g \in \mathcal{G}} C_g \sum_{t \in \mathcal{T}} p_{g,t}$$\\
+  \item Code:
+  \hspace{-1.5cm}\begin{Verbatim}[fontsize=\scriptsize]
+    @objective(m, Min, ∑(C[g]*∑(p[g,t] for t ∈ T) for g ∈ G))
+  \end{Verbatim}
+\end{itemize}
+
+\end{itemize}
+

@@ -1,14 +1,402 @@
-\documentclass{article}
-\usepackage[utf8]{inputenc}
 
-\title{GasElec_Presentation}
-\author{rodrigo.garciana }
+\documentclass[handout]{beamer}
+
+%\usetheme{Antibes}
+\usetheme{Frankfurt}
+%\usetheme{Darmstadt}
+%\usetheme{Copenhagen}
+
+\usefonttheme{professionalfonts}
+
+\usepackage[utf8x]{inputenc}
+\usepackage{multicol}
+\usepackage{IEEEtrantools}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage[noend]{algpseudocode}
+\usepackage{setspace}
+\usepackage{subcaption}
+\usepackage{circuitikz}
+\usepackage{tikz}
+\usepackage{pmboxdraw}
+\usepackage{fancyvrb}
+\setbeamertemplate{caption}[numbered]
+
+
+\DeclareUnicodeCharacter{2693}{\anchor}
+
+\usetikzlibrary{arrows,shapes,tikzmark,positioning}
+%\usepackage{cite}
+
+
+
+\tikzset{generator/.style={
+  circle,
+  draw,
+  scale=1,
+ }
+}
+
+
+\title[Development of a Coordinated Gas-Electricity optimisation model]{\normalsize{Development of a Gas-Electricity optimisation model}}
+% A subtitle is optional and this may be deleted
+\subtitle{\small{Modelling language migration and future extensions}}
+\author{Original work: Allahham \& Hosseini\\ Re-coding: McKinnon, Dent \& Garcia}
+\institute{National Centre for Energy System Integration (CESI)}
 \date{April 2020}
+
+
+\subject{Optimisation in Power Models}
 
 \begin{document}
 
-\maketitle
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Outline}
+  \tableofcontents
+  % You might wish to add the option [pausesections]
+\end{frame}
+
+\section{Goal}
+
+\begin{frame}[t]{Goal}
+
+  CESI is a multi-discipline knowledge and skill centre with topics and discussions crossing multiple fields, where easy-to-access tools are fundamental to enable these discussions.\\[12pt]
+
+  While the existing optimisation models and implementations work well, we see advantages in coding the models using a modelling language.
+
+  \begin{figure}
+  \begin{center}
+  \includegraphics[width=.60\textwidth]{CESI.png}
+  \end{center}
+  \end{figure}
+
+\end{frame}
+
+
+\begin{frame}[t]{Goal (cont.)}
+  \vspace{0.5cm}
+  The benefits we see in using a modelling language are:\\[12pt]
+
+  \begin{enumerate}
+    \item To provide a robust framework for easily extendable models using Allahham \& Hosseini as a base.
+    \item To facilitate access to the tools by using open-source software.
+    \item To enable end-users to easily modify and/or adapt the models according to their needs.
+    \item To benefit from the use of mature optimisation solvers potentially speeding up the solution of models.
+    \item To be able to model and solve different forms of problems, e.g. models with integer decisions.
+    \item To allow for different datasets to be easily integrated into the models.
+  \end{enumerate}
+
+\end{frame}
 
 \section{Introduction}
+
+\subsection*{Optimisation models}
+\begin{frame}[t]{Introduction}{Optimisation models}
+\textbf{What is an optimisation model?}\\[6pt]
+
+It's a mathematical description of a system that aims to minimise or maximise an objective with some constraints. \\[6pt]
+
+An optimization model has three main components:
+\begin{enumerate}
+  \item An objective function. This is the function that needs to be optimised (maximised or minimised).
+  \item A collection of decision variables. The solution to the optimisation problem is the set of values of the decision variables for which the objective function reaches its optimal value.
+  \item A collection of constraints that restrict the values of the decision variables.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Introduction}{Optimisation models (cont.)}
+\textbf{What is an optimisation model?}\\[6pt]
+
+\begin{block}{Objective function}
+\vspace{-0.4cm}
+  \begin{IEEEeqnarray*}{c}
+    \min_{x} \quad f(x)
+  \end{IEEEeqnarray*}
+\end{block}
+
+\begin{block}{Contraints}
+subject to:
+\vspace{-0.8cm}
+\begin{IEEEeqnarray*}{rcl}
+  g(x)&\;=\;&0\\
+  h(x) &\;\leq\;& 0\\
+  x &\;\geq\;& 0
+\end{IEEEeqnarray*}
+
+\end{block}
+
+\begin{block}{Variables and Data}
+\begin{itemize}
+  \item Variables. $x \in \mathbb{R}^n$
+  \item Data. Encoded in $f$, $g$ and $h$.
+\end{itemize}
+\end{block}
+
+
+\end{frame}
+
+\begin{frame}[t]{Introduction}{Optimisation models (cont.)}
+
+The objective function togheter with the constraints and nature of the variables will determine the type of problem to be solved.\\[12pt]
+
+Some examples of types of problem can be:\\[12pt]
+\begin{itemize}
+\item Linear programming: $f$,$g$ and $h$ are linear.
+\item Integer programming: integer solution required.
+\item Non-linear programming: $f$ or $g$ or $h$ are non-linear.
+\item Dynamic programming: $g$ or $h$ describe system dynamics.
+\item Stochastic programming: $f$, $g$ or $h$ are functions of random variables.
+\end{itemize}
+
+\end{frame}
+
+\section{Programming languages and software}
+
+\begin{frame}[t]{Programming languages and software}
+  In order to solve problems ranging from a couple to potentially hundreds of thousands variables with complex constraints we need to code the models in computer languages.\\[12pt]
+
+  For optimisation problems, the software tools used can be divided arguably into 3 main categories:
+
+  \begin{enumerate}
+    \item General-purpose / Mathematical languages
+    \item Algebraic modelling languages
+    \item Solvers
+  \end{enumerate}
+
+\end{frame}
+
+\subsection{General purpose languages}
+\begin{frame}{Programming languages and software}{General-purpose programming languages}
+\textbf{General-purpose programming languages} are designed to be used for writing software in the widest variety of application domains, therefore they lack specialized features for a particular domain such as optimisation. On the other hand, they are widely used and able to do a variety of tasks.\\[6pt]
+
+Examples: C++, Fortran, Visual Basic, Java, Python, \underline{Julia}.\\[12pt]
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=.60\textwidth]{GeneralLang.png}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{Programming languages and software}{General-purpose programming languages}
+\textbf{Mathematical programming languages} are similar to general-purpose languages in the sense that they cover a broad range of applications, but they have been developed to be efficient with different mathematical aspects. \\[6pt]
+
+Examples:
+
+\begin{itemize}
+  \item Numerical calculations: Matlab, R and \underline{Julia}.
+  \item Symbolic algebra: Mathematica and Maple.
+\end{itemize}
+
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=.60\textwidth]{MathLang.png}
+\end{center}
+\end{figure}
+
+\end{frame}
+
+\subsection{Algebraic modelling languages}
+\begin{frame}[t]{Programming languages and software}{Algebraic modelling languages}
+\textbf{Algebraic modelling languages} are computer programming languages for describing and solving high complexity problems for large scale mathematical computation. The main advantage is the similarity of their syntax to the mathematical notation of optimisation problems.\\[6pt]
+
+This allows for a very concise and readable definition of problems in the domain of optimization, which is supported by certain language elements like sets, indices, algebraic expressions, index and data handling variables, constraints with arbitrary names.\\[6pt]
+
+Examples: AMPL, AIMMS, GAMS, Lindo, JuMP\footnote[frame]{Technically not a modelling language, rather a quasi-core package for Julia.}.
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=.50\textwidth]{AML.png}
+\end{center}
+\end{figure}
+
+
+\end{frame}
+
+\subsection{Solvers}
+\begin{frame}{Programming languages and software}{Solvers}
+A \textbf{solver} is a piece of mathematical software, in the form of a stand-alone computer program or as a software library, that ''solves" a mathematical problem by applying mathematical techniques. A solver takes problem descriptions in some sort of generic form and calculates their solution.\\[6pt]
+Commonly a solver specialises in a type of problem to solve depending on its characteristics.\\[6pt]
+
+Examples: CPLEX (LP, MILP, SDP, SOCP), Gurobi (LP, MILP SDP, SOCP), Knitro (MINLP), Ipopt (NLP).
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=.75\textwidth]{Solvers.png}
+\end{center}
+\end{figure}
+
+
+
+\end{frame}
+
+\begin{frame}[t]{Programming languages and software}{Summary / Benefits}
+\textbf{General-Purpose/Mathematical programming language}. Widely used and can be used for different goals.\\[6pt]
+
+\textbf{Algebraic modelling language}. Allows for concise equation-like syntax, easy to understand and interpret. Can help modelling diverse optimisation problems.\\[6pt]
+
+\textbf{Solver}. Especialised solving packages, which exploit the structure of the problems and use built-in operations to solve them, e.g. Automatic forward/backward differentiation, using robust algorithms (IPM, Simplex, etcetera.)
+\end{frame}
+
+
+\begin{frame}[t,fragile]{Programming languages and software}{Example syntax in JuMP (Algebraic modelling)}
+\begin{itemize}
+\item Constraint for Power Generation Limits:
+\begin{itemize}
+  \item Expression:
+  $$P^{LB}_g \leq p_{g,t} \leq  P^{UB}_g \quad \forall g \in \mathcal{G},\; \forall t \in \mathcal{T}$$\\
+  \item Code:
+  \hspace{-1.5cm}\begin{Verbatim}[fontsize=\scriptsize]
+    @constraint(m, PLim[g ∈ G, t ∈ T], P_LB[g] ≤ p[g,t] ≤ P_UB[g])
+  \end{Verbatim}
+\end{itemize}\vspace{12pt}
+\item Objective function:
+\begin{itemize}
+  \item Expression:
+  $$\min \quad \sum_{g \in \mathcal{G}} C_g \sum_{t \in \mathcal{T}} p_{g,t}$$\\
+  \item Code:
+  \hspace{-1.5cm}\begin{Verbatim}[fontsize=\scriptsize]
+    @objective(m, Min, ∑(C[g]*∑(p[g,t] for t ∈ T) for g ∈ G))
+  \end{Verbatim}
+\end{itemize}
+
+\end{itemize}
+
+\end{frame}
+
+\subsection{Proposal}
+\begin{frame}[t]{Programming languages and software}{Proposal}
+  To use and integrated programming approach by incorporating into our modelling and solving approaches the 3 main softare elements used for optimisation. This allows for flexibility, robustness and speed. In concrete to:\\[12pt]
+\begin{enumerate}
+  \item Use \textbf{Julia} as a general/mathematical progamming software.
+  \item Use \textbf{JuMP} as a algebraic modelling language.
+  \item Use a solver (\textbf{Ipopt} or others).
+\end{enumerate}
+\end{frame}
+
+\begin{frame}[t]{Programming languages and software}{Proposal (cont.)}
+  \textbf{Why?}\\[12pt]
+  Julia is free, fast (Figure \ref{fig:speed}) and has a friendly syntax (similar to Matlab). Julia has had an important increase of optimisation users that benefit from the tight integration with JuMP. Julia is compatible with other languages and have packages to integrate it with other languages such as Python.\\[6pt]
+
+  JuMP is also free, fast and friendly. It benefits from being solver-agnostic and benchmarking has shown that can create problems at similar speeds than AMPL.
+\end{frame}
+
+\begin{frame}[t]{Programming languages and software}{Proposal (cont.)}
+  \begin{figure}
+  \begin{center}
+  \includegraphics[width=\textwidth]{benchmarks.eps}
+  \end{center}
+  \caption{Benchmark of some common programming languages}\label{fig:speed}
+  \end{figure}
+
+\end{frame}
+
+\section{Modelling components}
+
+\subsection{Model}
+\begin{frame}[t]{Modelling components}{Model}
+
+  The optimisation \textbf{model} considers the whole set of equations that define the behaviour and response of a system. The model once written in an algebraic way can be then ''coded" in the algebraic software (JuMP).\\[6pt]
+
+  If new components of the system are considered or the dynamics change, then the model needs to be modified to reflect this situation. Examples of modifications of the model in this context are: extensions to multi-period operational problems, capacity planning problems, heat-network integrations, etcetera.
+\end{frame}
+
+\subsection{Data}
+\begin{frame}[t]{Modelling components}{Data}
+  The same dynamics in a system (model) can behave differently depending on the \textbf{Data}. The data needs to be read and integrated as parameters in the model. The data can come from different datasets and have information of different places. Such as information about Findhorn or Newcastle.\\[6pt]
+
+  There are many different ways of reading data into Julia, directly or with the use of diverse packages and formats. It is important to mention that standard matpower formats are limited in their reach, as they cannot easily handle multi-period settings or other extensions.
+
+\end{frame}
+
+
+\section{Re-coding implementation}
+
+\subsection{Progress}
+\begin{frame}[t]{Re-coding}{Activities}
+
+The aim of this work is to use Allahham \& Hosseini gas-electricity optimsiation model and recoding it to benefit from the use of Julia, JuMP and solvers (for the reasons stated before). \\[12pt]
+
+Also, McKinnon has done a recoding in AMPL that shares most of the benefits of the Julia/JuMP recode.
+
+\end{frame}
+
+\begin{frame}[t]{Re-coding}{Progress}
+
+Progress to date:
+\begin{itemize}
+  \item Read the full code, analysed how the data and model are linked and what were the implications of extending this code to more general cases.
+  \item Developed an integrated data management module for reading and writing friendly datafiles, without the need of external packages. We've chosen to use a clean and robust ''format" based on the AMPL data formats for the electrical networks, gas networks and the coupling nodes.
+  \item Coded routines for matpower data file reading, so standard matpower cases can be easily used, without the need of Matlab or manual conversions of the data files.
+  \item Verified cases between re-codings Matlab-AMPL-Julia
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[t]{Re-coding}{Data}
+At the moment, the data can be read easily in matpower format or in the AMPL-like format. Here are snapshots of both formats.
+
+\begin{figure}
+\begin{center}
+\includegraphics[height=0.55\textheight]{AMPLlike2.png}
+\end{center}
+\caption{AMPL-like data format}\label{fig:ampllike}
+\end{figure}
+\end{frame}
+
+
+\begin{frame}{Re-coding}{Data (cont.)}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\textwidth]{Matpowerlike2.png}
+\end{center}
+\caption{Matpower-like data format}\label{fig:matpowerlike}
+\end{figure}
+
+
+\end{frame}
+
+\subsection*{Models}
+
+\begin{frame}[t]{Re-coding}{Models}
+
+  The models are written in JuMP and consist in roughly 3 groups of equations. The first group consist in capturing the physics and limitations of the electrical network (in A\&H integrated model, they rely on the model specified in matpower), the physics of the gas networks (specified by A\&H in their own equations) and finally, the links between networks.\\[6pt]
+
+  The problem is then solved using interior point methods by the solver (Ipopt) without the need of manually specifying and creating vectors with derivatives (Jacobians) or any other symbolic or numerical routine. All is done efficiently by the solver.
+\end{frame}
+
+\begin{frame}[t]{Re-coding}{Models (cont.)}
+  An extract of the electrical model can be seen here:
+
+  \begin{figure}
+  \begin{center}
+  \includegraphics[height=0.66\textheight]{OPF2.png}
+  \end{center}
+  \caption{Electrical network contraints (extract)}\label{fig:opf}
+  \end{figure}
+
+\end{frame}
+
+
+\subsection{Demonstration}
+
+  \begin{frame}{Re-coding}{Demonstration}
+    \textbf{Live walktrough the code and its execution}\\[12pt]
+    (Show Julia/JuMP code vs. original code to show the dramatic difference in complexity)
+  \end{frame}
+
+\subsection{Discussion}
+\begin{frame}{Re-coding}{Discussion}
+  \textbf{How can be used and what is needed to take it forward?}\\[12pt]
+  (Discussion by Chris, ask him for some points here.)
+
+\end{frame}
 
 \end{document}
