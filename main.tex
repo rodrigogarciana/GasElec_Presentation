@@ -1,48 +1,25 @@
-
 \documentclass[handout]{beamer}
-
-%\usetheme{Antibes}
 \usetheme{Frankfurt}
-%\usetheme{Darmstadt}
-%\usetheme{Copenhagen}
-
 \usefonttheme{professionalfonts}
 
 \usepackage[utf8x]{inputenc}
 \usepackage{multicol}
 \usepackage{IEEEtrantools}
 \usepackage{amsmath}
-\usepackage{algorithm}
-\usepackage{algorithmicx}
-\usepackage[noend]{algpseudocode}
 \usepackage{setspace}
 \usepackage{subcaption}
-\usepackage{circuitikz}
-\usepackage{tikz}
 \usepackage{pmboxdraw}
 \usepackage{fancyvrb}
 \setbeamertemplate{caption}[numbered]
 
-
-\DeclareUnicodeCharacter{2693}{\anchor}
-
-\usetikzlibrary{arrows,shapes,tikzmark,positioning}
-%\usepackage{cite}
-
-
-
-\tikzset{generator/.style={
-  circle,
-  draw,
-  scale=1,
- }
-}
+\newcommand{\overbar}[1]{\mkern 1.5mu\overline{\mkern-1.5mu#1\mkern-1.5mu}\mkern 1.5mu}
+\newcommand\Fontvi{\fontsize{9.5}{10.7}\selectfont}
 
 
 \title[Development of a Coordinated Gas-Electricity optimisation model]{\normalsize{Development of a Gas-Electricity optimisation model}}
-% A subtitle is optional and this may be deleted
 \subtitle{\small{Modelling language migration and future extensions}}
-\author{Original work: Allahham \& Hosseini\\ Re-coding: McKinnon, Dent \& Garcia}
+\author{\texorpdfstring{Original work: }{}Allahham \& Hosseini \texorpdfstring{\\Re-coding: }{}McKinnon, Dent \& Garcia}
+
 \institute{National Centre for Energy System Integration (CESI)}
 \date{April 2020}
 
@@ -87,7 +64,7 @@
     \item To enable end-users to easily modify and/or adapt the models according to their needs.
     \item To benefit from the use of mature optimisation solvers potentially speeding up the solution of models.
     \item To be able to model and solve different forms of problems, e.g. models with integer decisions.
-    \item To allow for different datasets to be easily integrated into the models.
+    \item To allow for different data sets to be easily integrated into the models.
   \end{enumerate}
 
 \end{frame}
@@ -141,7 +118,7 @@ subject to:
 
 \begin{frame}[t]{Introduction}{Optimisation models (cont.)}
 
-The objective function togheter with the constraints and nature of the variables will determine the type of problem to be solved.\\[12pt]
+The objective function together with the constraints and nature of the variables will determine the type of problem to be solved.\\[12pt]
 
 Some examples of types of problem can be:\\[12pt]
 \begin{itemize}
@@ -153,6 +130,48 @@ Some examples of types of problem can be:\\[12pt]
 \end{itemize}
 
 \end{frame}
+
+
+\begin{frame}[t]{Introduction}{Example: Economic dispatch with energy limits}
+\Fontvi
+\textbf{Description:}\\
+Minimise the total cost of generation in a day, by satisfying the power demand while using optimally generators G1, G2 and G3; where G1 is limited in the energy it can produce.\\[6pt]
+
+\textbf{Sets:}
+\begin{itemize}
+    \item {\makebox[0.75cm]{$\mathcal{G}$\hfill}: Set of generators. Here $\mathcal{G} = \{G1,G2,G3\}$}
+    \item {\makebox[0.75cm]{$\mathcal{G}^E$\hfill}: Subset of generators with energy limits. $\mathcal{G}^E = \{G1\}$}
+    \item {\makebox[0.75cm]{$\mathcal{T}$\hfill}: Set of periods or hours in a day. $\mathcal{T} = \{1,2...24\}$}
+\end{itemize}
+
+\textbf{Parameters:}
+\begin{itemize}
+    \item {\makebox[0.75cm]{$P^D_t$\hfill}: Power demand in period $t$}
+    \item {\makebox[0.75cm]{$\overbar{P}_g$\hfill}: Maximum power output of generator $g$}
+    \item {\makebox[0.75cm]{$U_g$\hfill}: Total energy available from generator $g$}
+    \item {\makebox[0.75cm]{$C^G_g$\hfill}: Energy price (£/MWh) of generator $g$}
+\end{itemize}
+
+\textbf{Variables:}
+\begin{itemize}
+    \item {\makebox[0.75cm]{$p^G_{gt}$\hfill}: Power output of generator $g$ in period $t$}
+\end{itemize}
+\end{frame}
+
+
+
+\begin{frame}[t]{Introduction}{Example: Economic dispatch with energy limits (cont.)}
+\textbf{Objective:}\\
+$$\min \quad \sum_{g \in \mathcal{G}} C^G_g \; \sum_{t \in \mathcal{T}} p^G_{gt}$$
+\textbf{Constraints:}\\
+\begin{IEEEeqnarray*}{rcl}
+\text{Power balance: } \quad & \sum_{g \in \mathcal{G}} p^G_{gt} = P^D_t & \quad \forall t \in \mathcal{T}\\
+\text{Energy consumption limits: } \quad &  \sum_{t \in \mathcal{T}} p^G_{gt} \leq U_g & \quad \forall g \in \mathcal{G}^E \\
+\text{Generator limits: } \quad & 0 \leq p^G_{gt} \leq \overbar{P}_g & \quad \forall g \in \mathcal{G}, t \in \mathcal{T}
+\end{IEEEeqnarray*}
+
+\end{frame}
+
 
 \section{Programming languages and software}
 
@@ -290,7 +309,7 @@ Examples: CPLEX (LP, MILP, SDP, SOCP), Gurobi (LP, MILP SDP, SOCP), Knitro (MINL
 \begin{frame}[t]{Programming languages and software}{Proposal (cont.)}
   \begin{figure}
   \begin{center}
-  \includegraphics[width=\textwidth]{benchmarks.eps}
+  \includegraphics[width=0.95\textwidth]{benchmarks.eps}
   \end{center}
   \caption{Benchmark of some common programming languages}\label{fig:speed}
   \end{figure}
@@ -377,9 +396,9 @@ At the moment, the data can be read easily in matpower format or in the AMPL-lik
 
   \begin{figure}
   \begin{center}
-  \includegraphics[height=0.66\textheight]{OPF2.png}
+  \includegraphics[height=0.55\textheight]{OPF2.png}
   \end{center}
-  \caption{Electrical network contraints (extract)}\label{fig:opf}
+  \caption{Electrical network constraints (extract)}\label{fig:opf}
   \end{figure}
 
 \end{frame}
