@@ -16,7 +16,7 @@
 \newcommand\Fontvi{\fontsize{9.5}{10.7}\selectfont}
 
 
-\title[Development of a Coordinated Gas-Electricity optimisation model]{\normalsize{Development of a Gas-Electricity optimisation model}}
+\title[Development of a Coordinated Gas-Electricity optimisation model]{\normalsize{Development of a Gas-Electricity load flow and optimization model}}
 \subtitle{\small{Modelling language migration and future extensions}}
 \author{\texorpdfstring{Original work: }{}Allahham \& Hosseini \texorpdfstring{\\Re-coding: }{}McKinnon, Dent \& Garcia}
 
@@ -37,13 +37,18 @@
   % You might wish to add the option [pausesections]
 \end{frame}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \section{Goal}
 
 \begin{frame}[t]{Goal}
 
   CESI is a multi-discipline knowledge and skill centre with topics and discussions crossing multiple fields, where easy-to-access tools are fundamental to enable these discussions.\\[12pt]
 
-  While the existing optimisation models and implementations work well, we see advantages in coding the models using a modelling language.
+  While the existing optimisation models and implementations work well within their current scope, we see advantages in coding the models using a modelling language.
+  
+  Note load flow models may be formulated as optimization models with constant objectives.
 
   \begin{figure}
   \begin{center}
@@ -53,6 +58,8 @@
 
 \end{frame}
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{frame}[t]{Goal (cont.)}
   \vspace{0.5cm}
@@ -69,21 +76,44 @@
 
 \end{frame}
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \section{Introduction}
 
 \subsection*{Optimisation models}
+
+\begin{frame}[t]{What is a computer model}
+  \vspace{0.5cm}
+  Four components:\\[12pt]
+
+  \begin{enumerate}
+    \item Model specification / governing equations / other synonyms -- this is something which would be specified on paper, and exists independently of any particular data or computer implementation.
+    \item Data for specific cases.
+    \item (Possibly) a numerical scheme to evaluate outputs (in some cases direct solution is possible but not here). Again this exists independently of specific data or computer implementation, and is something specified on paper.
+    \item Computer implementation.
+  \end{enumerate}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}[t]{Introduction}{Optimisation models}
 \textbf{What is an optimisation model?}\\[6pt]
 
-It's a mathematical description of a system that aims to minimise or maximise an objective with some constraints. \\[6pt]
+Finding the best available solution to a problem subject to certain constraints on values variables can take. \\[6pt]
 
-An optimization model has three main components:
+An optimization model has three components:
 \begin{enumerate}
   \item An objective function. This is the function that needs to be optimised (maximised or minimised).
-  \item A collection of decision variables. The solution to the optimisation problem is the set of values of the decision variables for which the objective function reaches its optimal value.
-  \item A collection of constraints that restrict the values of the decision variables.
+  \item Decision variables. The variables in the mathematical problem that can be varied; the aim is to find the combination of variables which gives the `best' value of the objective function.
+  \item Constraints on the decision variables. These are usually expressed as equality or inequality constraints on functions of the decision variables.
 \end{enumerate}
 \end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{frame}{Introduction}{Optimisation models (cont.)}
 \textbf{What is an optimisation model?}\\[6pt]
@@ -108,29 +138,15 @@ subject to:
 
 \begin{block}{Variables and Data}
 \begin{itemize}
-  \item Variables. $x \in \mathbb{R}^n$
-  \item Data. Encoded in $f$, $g$ and $h$.
+  \item Variables. $x \in \mathbb{R}^n$ (or subset thereof)
+%  \item Data. Encoded in $f$, $g$ and $h$.
 \end{itemize}
 \end{block}
 
 
 \end{frame}
 
-\begin{frame}[t]{Introduction}{Optimisation models (cont.)}
-
-The objective function together with the constraints and nature of the variables will determine the type of problem to be solved.\\[12pt]
-
-Some examples of types of problem can be:\\[12pt]
-\begin{itemize}
-\item Linear programming: $f$,$g$ and $h$ are linear.
-\item Integer programming: integer solution required.
-\item Non-linear programming: $f$ or $g$ or $h$ are non-linear.
-\item Dynamic programming: $g$ or $h$ describe system dynamics.
-\item Stochastic programming: $f$, $g$ or $h$ are functions of random variables.
-\end{itemize}
-
-\end{frame}
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{frame}[t]{Introduction}{Example: Economic dispatch with energy limits}
 \Fontvi
@@ -158,7 +174,7 @@ Minimise the total cost of generation in a day, by satisfying the power demand w
 \end{itemize}
 \end{frame}
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{frame}[t]{Introduction}{Example: Economic dispatch with energy limits (cont.)}
 \textbf{Objective:}\\
@@ -170,7 +186,28 @@ $$\min \quad \sum_{g \in \mathcal{G}} C^G_g \; \sum_{t \in \mathcal{T}} p^G_{gt}
 \text{Generator limits: } \quad & 0 \leq p^G_{gt} \leq \overbar{P}_g & \quad \forall g \in \mathcal{G}, t \in \mathcal{T}
 \end{IEEEeqnarray*}
 
+\textbf{Note:}
+Not yet specified anything about a specific instance, including the size of the sets
+
 \end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[t]{Introduction}{Optimisation models (cont.)}
+
+The form of the objective function together with the constraints and nature of the variables will determine the type of problem to be solved.\\[12pt]
+
+Some examples of types of problem:\\[12pt]
+\begin{itemize}
+\item Linear programming: $f$,$g$ and $h$ are linear.
+\item (Mixed) Integer programming: integer solution required (for some variables).
+\item Non-linear programming: $f$ or $g$ or $h$ are non-linear.
+\end{itemize}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 
 \section{Programming languages and software}
@@ -178,19 +215,29 @@ $$\min \quad \sum_{g \in \mathcal{G}} C^G_g \; \sum_{t \in \mathcal{T}} p^G_{gt}
 \begin{frame}[t]{Programming languages and software}
   In order to solve problems ranging from a couple to potentially hundreds of thousands variables with complex constraints we need to code the models in computer languages.\\[12pt]
 
-  For optimisation problems, the software tools used can be divided arguably into 3 main categories:
-
+  For optimisation problems, we need to decide 
+  
+  the software tools used might be divided  into 3 main categories:
   \begin{enumerate}
-    \item General-purpose / Mathematical languages
+    \item What we will code, and what we will use pre-built tools for
+    \item What language do we use
+  \end{enumerate}
+
+  Environments can be divided into
+  \begin{enumerate}
+    \item General-purpose programming languages
+    \item Specialist mathematical languages
     \item Algebraic modelling languages
-    \item Solvers
   \end{enumerate}
 
 \end{frame}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 \subsection{General purpose languages}
 \begin{frame}{Programming languages and software}{General-purpose programming languages}
-\textbf{General-purpose programming languages} are designed to be used for writing software in the widest variety of application domains, therefore they lack specialized features for a particular domain such as optimisation. On the other hand, they are widely used and able to do a variety of tasks.\\[6pt]
+\textbf{General-purpose programming languages} are designed to be used for writing software in the widest variety of application domains. Thus they lack highly specialized features for a particular domain such as optimisation, though are flexible in the range of tasks to be performed, and often permit very efficient code.\\[6pt]
 
 Examples: C++, Fortran, Visual Basic, Java, Python, \underline{Julia}.\\[12pt]
 
@@ -202,8 +249,10 @@ Examples: C++, Fortran, Visual Basic, Java, Python, \underline{Julia}.\\[12pt]
 
 \end{frame}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}{Programming languages and software}{General-purpose programming languages}
-\textbf{Mathematical programming languages} are similar to general-purpose languages in the sense that they cover a broad range of applications, but they have been developed to be efficient with different mathematical aspects. \\[6pt]
+\textbf{Mathematical programming languages} are similar to general-purpose languages in the sense that they cover a broad range of applications, but they have been developed to be efficient with certain mathematical aspects (either specifying problems or computation). \\[6pt]
 
 Examples:
 
@@ -221,48 +270,26 @@ Examples:
 
 \end{frame}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \subsection{Algebraic modelling languages}
 \begin{frame}[t]{Programming languages and software}{Algebraic modelling languages}
-\textbf{Algebraic modelling languages} are computer programming languages for describing and solving high complexity problems for large scale mathematical computation. The main advantage is the similarity of their syntax to the mathematical notation of optimisation problems.\\[6pt]
+\textbf{Algebraic modelling languages} are computer programming languages which allow specification of optimization problems in the same form as on paper, combining this with data to create a specific instance (or generated mathematical program, etc), and pass it to a solver. For nonlinear programs automatic differentiation of objective and constraint functions is provded.\\[6pt]
 
-This allows for a very concise and readable definition of problems in the domain of optimization, which is supported by certain language elements like sets, indices, algebraic expressions, index and data handling variables, constraints with arbitrary names.\\[6pt]
+For specifying problems there is no programming in the traditional sense; there may be a scripting language. Language elements include sets, indices, algebraic expressions, index and data handling.\\[6pt]
 
-Examples: AMPL, AIMMS, GAMS, Lindo, JuMP\footnote[frame]{Technically not a modelling language, rather a quasi-core package for Julia.}.
+Examples: AMPL, AIMMS, GAMS, Lindo, JuMP\footnote[frame]{Modelling language extension for Julia.}.
 
 \begin{figure}
 \begin{center}
-\includegraphics[width=.50\textwidth]{AML.png}
+\includegraphics[width=.40\textwidth]{AML.png}
 \end{center}
 \end{figure}
 
 
 \end{frame}
 
-\subsection{Solvers}
-\begin{frame}{Programming languages and software}{Solvers}
-A \textbf{solver} is a piece of mathematical software, in the form of a stand-alone computer program or as a software library, that ''solves" a mathematical problem by applying mathematical techniques. A solver takes problem descriptions in some sort of generic form and calculates their solution.\\[6pt]
-Commonly a solver specialises in a type of problem to solve depending on its characteristics.\\[6pt]
-
-Examples: CPLEX (LP, MILP, SDP, SOCP), Gurobi (LP, MILP SDP, SOCP), Knitro (MINLP), Ipopt (NLP).
-
-\begin{figure}
-\begin{center}
-\includegraphics[width=.75\textwidth]{Solvers.png}
-\end{center}
-\end{figure}
-
-
-
-\end{frame}
-
-\begin{frame}[t]{Programming languages and software}{Summary / Benefits}
-\textbf{General-Purpose/Mathematical programming language}. Widely used and can be used for different goals.\\[6pt]
-
-\textbf{Algebraic modelling language}. Allows for concise equation-like syntax, easy to understand and interpret. Can help modelling diverse optimisation problems.\\[6pt]
-
-\textbf{Solver}. Especialised solving packages, which exploit the structure of the problems and use built-in operations to solve them, e.g. Automatic forward/backward differentiation, using robust algorithms (IPM, Simplex, etcetera.)
-\end{frame}
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{frame}[t,fragile]{Programming languages and software}{Example syntax in JuMP (Algebraic modelling)}
 \begin{itemize}
@@ -288,6 +315,63 @@ Examples: CPLEX (LP, MILP, SDP, SOCP), Gurobi (LP, MILP SDP, SOCP), Knitro (MINL
 \end{itemize}
 
 \end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Solvers}
+\begin{frame}{Programming languages and software}{Solvers}
+A \textbf{solver} is a software tool which identifies the optimal solution for a specific instance of an optimization problem.
+Commonly a solver is for a specific class of problem (LP, MILP, NLP, etc).\\[6pt]
+
+Necessary to pass to the solver:
+\begin{itemize}
+    \item LP: Constraint matrix, and objective fn and RHS vectors
+    \item NLP: Constraint and objective fns, (plus 1st/2nd derivatives either in modelling language or solver)
+\end{itemize}
+
+Examples: CPLEX (LP, MILP, SDP, SOCP), Gurobi (LP, MILP SDP, SOCP), Knitro (MINLP), Ipopt (NLP).
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=.75\textwidth]{Solvers.png}
+\end{center}
+\end{figure}
+
+
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[t]{Programming languages and software}{Proposal (cont.)}
+  \begin{figure}
+  \begin{center}
+  \includegraphics[width=0.95\textwidth]{benchmarks.eps}
+  \end{center}
+  \caption{Benchmark of some common programming languages}\label{fig:speed}
+  \end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}[t]{What lies behind our proposal}
+
+\textbf{Resusable on different datasets/examples}.\\[6pt]
+
+\textbf{Low development time}. Quick transfer of paper-based model in computer environmnent.\\[6pt]
+
+\textbf{Easily extensible}. i.e. adding different constraints, time element, optimization versus load flow, etc.\\[6pt]
+
+\textbf{Automated combination of model and data, and differentiation}. It is not nice to hard code any of this for specific cases.\\[6pt]
+
+\textbf{Use efficient general purpose solvers}. Don't want to think about solution algorithm, typically no benefit in doing so unless exploiting block structure in constraint matrix.
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 \subsection{Proposal}
 \begin{frame}[t]{Programming languages and software}{Proposal}
