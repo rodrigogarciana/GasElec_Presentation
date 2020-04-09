@@ -21,7 +21,7 @@
 \author{\texorpdfstring{Original work: }{}Allahham \& Hosseini \texorpdfstring{\\Re-coding: }{}McKinnon, Dent \& Garcia}
 
 \institute{National Centre for Energy System Integration (CESI)}
-\date{April 2020}
+\date{9th April 2020}
 
 
 \subject{Optimisation in Power Models}
@@ -52,7 +52,7 @@
 
   \begin{figure}
   \begin{center}
-  \includegraphics[width=.60\textwidth]{CESI.png}
+  \includegraphics[width=.55\textwidth]{CESI.png}
   \end{center}
   \end{figure}
 
@@ -125,7 +125,7 @@ An optimization model has three components:
   \end{IEEEeqnarray*}
 \end{block}
 
-\begin{block}{Contraints}
+\begin{block}{Constraints}
 subject to:
 \vspace{-0.8cm}
 \begin{IEEEeqnarray*}{rcl}
@@ -215,15 +215,15 @@ Some examples of types of problem:\\[12pt]
 \begin{frame}[t]{Programming languages and software}
   In order to solve problems ranging from a couple to potentially hundreds of thousands variables with complex constraints we need to code the models in computer languages.\\[12pt]
 
-  For optimisation problems, we need to decide 
+  For optimisation problems, we need to decide:
   
-  the software tools used might be divided  into 3 main categories:
+  %the software tools used might be divided  into 3 main categories:
   \begin{enumerate}
     \item What we will code, and what we will use pre-built tools for
     \item What language do we use
   \end{enumerate}
 
-  Environments can be divided into
+  Environments can be divided into:
   \begin{enumerate}
     \item General-purpose programming languages
     \item Specialist mathematical languages
@@ -274,7 +274,7 @@ Examples:
 
 \subsection{Algebraic modelling languages}
 \begin{frame}[t]{Programming languages and software}{Algebraic modelling languages}
-\textbf{Algebraic modelling languages} are computer programming languages which allow specification of optimization problems in the same form as on paper, combining this with data to create a specific instance (or generated mathematical program, etc), and pass it to a solver. For nonlinear programs automatic differentiation of objective and constraint functions is provded.\\[6pt]
+\textbf{Algebraic modelling languages} are computer programming languages which allow specification of optimization problems in the same form as on paper, combining this with data to create a specific instance (or generated mathematical program, etc), and pass it to a solver. For nonlinear programs automatic differentiation of objective and constraint functions is provided.\\[6pt]
 
 For specifying problems there is no programming in the traditional sense; there may be a scripting language. Language elements include sets, indices, algebraic expressions, index and data handling.\\[6pt]
 
@@ -357,9 +357,9 @@ Examples: CPLEX (LP, MILP, SDP, SOCP), Gurobi (LP, MILP SDP, SOCP), Knitro (MINL
 
 \begin{frame}[t]{What lies behind our proposal}
 
-\textbf{Resusable on different datasets/examples}.\\[6pt]
+\textbf{Re-usable on different datasets/examples}.\\[6pt]
 
-\textbf{Low development time}. Quick transfer of paper-based model in computer environmnent.\\[6pt]
+\textbf{Low development time}. Quick transfer of paper-based model in computer environment.\\[6pt]
 
 \textbf{Easily extensible}. i.e. adding different constraints, time element, optimization versus load flow, etc.\\[6pt]
 
@@ -375,9 +375,9 @@ Examples: CPLEX (LP, MILP, SDP, SOCP), Gurobi (LP, MILP SDP, SOCP), Knitro (MINL
 
 \subsection{Proposal}
 \begin{frame}[t]{Programming languages and software}{Proposal}
-  To use and integrated programming approach by incorporating into our modelling and solving approaches the 3 main softare elements used for optimisation. This allows for flexibility, robustness and speed. In concrete to:\\[12pt]
+  To use and integrated programming approach by incorporating into our modelling and solving approaches the 3 main software elements used for optimisation. This allows for flexibility, robustness and speed. In concrete to:\\[12pt]
 \begin{enumerate}
-  \item Use \textbf{Julia} as a general/mathematical progamming software.
+  \item Use \textbf{Julia} as a general/mathematical programming software.
   \item Use \textbf{JuMP} as a algebraic modelling language.
   \item Use a solver (\textbf{Ipopt} or others).
 \end{enumerate}
@@ -387,18 +387,18 @@ Examples: CPLEX (LP, MILP, SDP, SOCP), Gurobi (LP, MILP SDP, SOCP), Knitro (MINL
   \textbf{Why?}\\[12pt]
   Julia is free, fast (Figure \ref{fig:speed}) and has a friendly syntax (similar to Matlab). Julia has had an important increase of optimisation users that benefit from the tight integration with JuMP. Julia is compatible with other languages and have packages to integrate it with other languages such as Python.\\[6pt]
 
-  JuMP is also free, fast and friendly. It benefits from being solver-agnostic and benchmarking has shown that can create problems at similar speeds than AMPL.
+  JuMP is also free, fast and friendly. It benefits from being solver-agnostic and the benchmarks has shown that can create problems at similar speeds than AMPL.
 \end{frame}
 
-\begin{frame}[t]{Programming languages and software}{Proposal (cont.)}
-  \begin{figure}
-  \begin{center}
-  \includegraphics[width=0.95\textwidth]{benchmarks.eps}
-  \end{center}
-  \caption{Benchmark of some common programming languages}\label{fig:speed}
-  \end{figure}
+%\begin{frame}[t]{Programming languages and software}{Proposal (cont.)}
+%  \begin{figure}
+%  \begin{center}
+%  \includegraphics[width=0.95\textwidth]{benchmarks.eps}
+%  \end{center}
+%  \caption{Benchmark of some common programming languages}\label{fig:speed}
+%  \end{figure}
 
-\end{frame}
+%\end{frame}
 
 \section{Modelling components}
 
@@ -407,12 +407,12 @@ Examples: CPLEX (LP, MILP, SDP, SOCP), Gurobi (LP, MILP SDP, SOCP), Knitro (MINL
 
   The optimisation \textbf{model} considers the whole set of equations that define the behaviour and response of a system. The model once written in an algebraic way can be then ''coded" in the algebraic software (JuMP).\\[6pt]
 
-  If new components of the system are considered or the dynamics change, then the model needs to be modified to reflect this situation. Examples of modifications of the model in this context are: extensions to multi-period operational problems, capacity planning problems, heat-network integrations, etcetera.
+  If new components of the system are considered or the dynamics change, then the model needs to be modified to reflect this situation. Examples of modifications of the model in this context are: extensions to multi-period operational problems, capacity planning problems, heat-network integration, etc.
 \end{frame}
 
 \subsection{Data}
 \begin{frame}[t]{Modelling components}{Data}
-  The same dynamics in a system (model) can behave differently depending on the \textbf{Data}. The data needs to be read and integrated as parameters in the model. The data can come from different datasets and have information of different places. Such as information about Findhorn or Newcastle.\\[6pt]
+  The same dynamics in a system (model) can behave differently depending on the \textbf{Data}. The data needs to be read and integrated as parameters in the model. The data can come from different data-sets and have information of different places. Such as information about Findhorn or Newcastle.\\[6pt]
 
   There are many different ways of reading data into Julia, directly or with the use of diverse packages and formats. It is important to mention that standard matpower formats are limited in their reach, as they cannot easily handle multi-period settings or other extensions.
 
@@ -424,9 +424,9 @@ Examples: CPLEX (LP, MILP, SDP, SOCP), Gurobi (LP, MILP SDP, SOCP), Knitro (MINL
 \subsection{Progress}
 \begin{frame}[t]{Re-coding}{Activities}
 
-The aim of this work is to use Allahham \& Hosseini gas-electricity optimsiation model and recoding it to benefit from the use of Julia, JuMP and solvers (for the reasons stated before). \\[12pt]
+The aim of this work is to use Allahham \& Hosseini gas-electricity optimisation model and re-coding it to benefit from the use of Julia, JuMP and solvers (for the reasons stated before). \\[12pt]
 
-Also, McKinnon has done a recoding in AMPL that shares most of the benefits of the Julia/JuMP recode.
+Also, McKinnon has done a re-coding in AMPL that shares most of the benefits of the Julia/JuMP re-code; and his re-code was used as the base for Julia/JuMP re-code.
 
 \end{frame}
 
@@ -491,14 +491,14 @@ At the moment, the data can be read easily in matpower format or in the AMPL-lik
 \subsection{Demonstration}
 
   \begin{frame}{Re-coding}{Demonstration}
-    \textbf{Live walktrough the code and its execution}\\[12pt]
-    (Show Julia/JuMP code vs. original code to show the dramatic difference in complexity)
+    \textbf{Live walk-trough the code and its execution}\\[12pt]
+    (See Julia/JuMP code vs. original code to show the difference in complexity)
   \end{frame}
 
 \subsection{Discussion}
 \begin{frame}{Re-coding}{Discussion}
   \textbf{How can be used and what is needed to take it forward?}\\[12pt]
-  (Discussion by Chris, ask him for some points here.)
+  (Discussion)
 
 \end{frame}
 
